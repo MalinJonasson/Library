@@ -1,4 +1,4 @@
-﻿using Domain;
+﻿using Domain.Models;
 using Infrastructure.DataBase;
 using System;
 using System.Collections.Generic;

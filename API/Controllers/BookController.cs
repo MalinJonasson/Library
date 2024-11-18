@@ -1,6 +1,5 @@
 ﻿using Application;
-using Domain;
-using Infrastructure.DataBase;
+using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
