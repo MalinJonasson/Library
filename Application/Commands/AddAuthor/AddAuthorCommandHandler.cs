@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Application.Commands.AddBook;
+using Domain.Models;
 using Infrastructure.Database;
 using MediatR;
 
@@ -13,7 +14,7 @@ namespace Application.Commands.AddAuthor
             _fakeDatabase = fakeDatabase;
         }
 
-        Task<Author> IRequestHandler<AddAuthorCommand, Author>.Handle(AddAuthorCommand request, CancellationToken cancellationToken)
+        public Task<Author> Handle(AddAuthorCommand request, CancellationToken cancellationToken)
         {
             Author authorToCreate = new()
             {
