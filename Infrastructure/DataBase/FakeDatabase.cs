@@ -1,23 +1,30 @@
-﻿using Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Models;
+using System.Xml.Linq;
 
-namespace Infrastructure.DataBase
+namespace Infrastructure.Database
 {
     public class FakeDatabase
     {
-        public List<Book> Books { get { return allBooksFromDB;  } set { allBooksFromDB = value;  } }
+        public List<Book> Books { get { return allBooksFromDB; } set { allBooksFromDB = value; } }
+        public List<Author> Authors { get { return allAuthorsFromDB; } set { allAuthorsFromDB = value; } }
 
         List<Book> allBooksFromDB = new List<Book>()
         {
-            new Book (1, "Book1", "AboutBook1"),
-            new Book (2, "Book2", "AboutBook2"),
-            new Book (3, "Book3", "AboutBook3"),
-            new Book (4, "Book4", "AboutBook4"),
-            new Book (5, "Book5", "AboutBook5"),
+            new Book { Id = Guid.NewGuid(), Title = "Book1", Description = "AboutBook1" },
+            new Book { Id = Guid.NewGuid(), Title = "Book2", Description = "AboutBook2" },
+            new Book { Id = Guid.NewGuid(), Title = "Book3", Description = "AboutBook3" },
+            new Book { Id = Guid.NewGuid(), Title = "Book4", Description = "AboutBook4" },
+            new Book { Id = Guid.NewGuid(), Title = "Book5", Description = "AboutBook5" },
+        };
+
+
+        List<Author> allAuthorsFromDB = new List<Author>()
+        {
+            new Author { Id = Guid.NewGuid(), Name = "Author1" },
+            new Author { Id = Guid.NewGuid(), Name = "Author2" },
+            new Author { Id = Guid.NewGuid(), Name = "Author3" },
+            new Author { Id = Guid.NewGuid(), Name = "Author4" },
+            new Author { Id = Guid.NewGuid(), Name = "Author5" },
         };
 
         // My CRUD Methods
@@ -28,9 +35,35 @@ namespace Infrastructure.DataBase
             return book;
         }
 
+        public void GetBooksById()
+        {
+
+        }
+
+        public void GetAllBooks()
+        {
+
+        }
+
+        public void UpdateBooks()
+        {
+
+        }
+
         public void DeleteBook(Book book)
         {
             allBooksFromDB.Remove(book);
+        }
+
+        public Author AddNewAuhtor(Author author)
+        {
+            allAuthorsFromDB.Add(author);
+            return author;
+        }
+
+        public void DeleteAuthor(Author author)
+        {
+            allAuthorsFromDB.Remove(author);
         }
     }
 }
