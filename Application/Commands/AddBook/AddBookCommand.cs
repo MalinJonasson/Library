@@ -1,14 +1,9 @@
 ﻿using Domain.Models;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Commands.AddBook
 {
-    public class AddBookCommand : IRequest<Book>
+    public class AddBookCommand : IRequest <Book>
     {
         public AddBookCommand(Book newBook)
         {

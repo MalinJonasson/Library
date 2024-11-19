@@ -1,47 +1,49 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application.Commands.AddBook;
+using Application.Commands.DeleteBook;
+using Application.Commands.UpdateBook;
+using Application.Queries.GetAll;
+using Application.Queries.GetAllById;
+using Domain.Models;
+using MediatR;
 
 namespace Application
 {
     public class BookMethods
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IMediator _mediator;
 
-        public BookMethods(){}
-        public BookMethods(FakeDatabase fakeDatabase)
+        public BookMethods() { }
+
+        public BookMethods(IMediator mediator)
         {
-            _fakeDatabase = fakeDatabase;
+            _mediator = mediator;
         }
 
         //Vallidering/felhantering
-        public Book AddNewBook()
+        public async void AddNewBook(Book book)
         {
-            //How to process data in application
-
-            Book newBookToAdd = new Book(1, "Book1", "AboutBook1");
-
-            //Seperations of consern, returnerar vad infrastrukturen gör
-            return _fakeDatabase.AddNewBook(newBookToAdd);
+            await _mediator.Send(new AddBookCommand(book));
         }
 
-        public Book DeleteBook()
+        public async void DeleteBook(Guid bookToDeleteId)
         {
-            throw new NotImplementedException();
+            await _mediator.Send(new DeleteBookByIdCommand(bookToDeleteId));
         }
 
-        public Book GetAllBooks()
+        public async void UpdateABook(Book updatedBook, Guid updatedBookId)
         {
-            throw new NotImplementedException();
+            await _mediator.Send(new UpdateBookByIdCommand(updatedBook, updatedBookId));
         }
 
-        public Book UpdateABook()
+        public async Task<List<Book>> GetAllBooks()
         {
-            throw new NotImplementedException();
+            return (await _mediator.Send(new GetAllBooksQuery()));
+        }
+
+        public async void GetAllBooksById(Guid bookId)
+        {
+            await _mediator.Send(new GetBookByIdQuery(bookId));
         }
     }
 }
+

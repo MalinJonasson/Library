@@ -1,5 +1,10 @@
-﻿using Application;
+﻿using Application.Commands.AddBook;
+using Application.Commands.DeleteBook;
+using Application.Commands.UpdateBook;
+using Application.Queries.GetAll;
+using Application.Queries.GetAllById;
 using Domain.Models;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -10,32 +15,47 @@ namespace API.Controllers
     {
         //CRUD GET UPDATE/PUT/PATCH POST DELETE
 
-        [HttpPost]
-        public Book AddBook()
+        internal readonly IMediator _mediator;
+
+        public BookController(IMediator mediator)
         {
-            BookMethods applicationLayerBookMethods = new BookMethods();
-            return applicationLayerBookMethods.AddNewBook();
+            _mediator = mediator;
+        }
+
+        [HttpPost]
+        [Route("addNewBook")]
+        public async void AddNewBook([FromBody] Book bookToAdd)
+        {
+            await _mediator.Send(new AddBookCommand(bookToAdd));
         }
 
         [HttpGet]
-        public Book GetAllBooks()
+        [Route("all")]
+        public async Task<IActionResult> GetAllBooks()
         {
-            BookMethods applicationLayerBookMethods = new BookMethods();
-            return applicationLayerBookMethods.GetAllBooks();
+            return Ok(await _mediator.Send(new GetAllBooksQuery()));
+        }
+
+        [HttpGet]
+        [Route("{bookId}")]
+        public async Task<IActionResult> GetBookById(Guid bookId)
+        {
+            return Ok(await _mediator.Send(new GetBookByIdQuery(bookId)));
         }
 
         [HttpPut]
-        public Book UpdateABook()
+        [Route("updateBook/{updatedBookId}")]
+        public async Task<IActionResult> UpdateBook([FromBody] Book updatedBook, Guid updatedBookId)
         {
-            BookMethods applicationLayerBookMethods = new BookMethods();
-            return applicationLayerBookMethods.UpdateABook();
+            return Ok(await _mediator.Send(new UpdateBookByIdCommand(updatedBook, updatedBookId)));
         }
 
         [HttpDelete]
-        public Book DeleteSBook()
+        [Route("deleteBook/{bookToDeleteId}")]
+        public async Task<IActionResult> DeleteBook([FromBody] Guid bookToDeleteId)
         {
-            BookMethods applicationLayerBookMethods = new BookMethods();
-            return applicationLayerBookMethods.DeleteBook();
+            return Ok(await _mediator.Send(new DeleteBookByIdCommand(bookToDeleteId)));
         }
+
     }
 }
