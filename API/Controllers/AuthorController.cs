@@ -1,8 +1,8 @@
-﻿using Application.Commands.AddAuthor;
-using Application.Commands.DeleteAuthor;
-using Application.Commands.UpdateAuthor;
-using Application.Queries.GetAll;
-using Application.Queries.GetAllById;
+﻿using Application.Commands.Authors.AddAuthor;
+using Application.Commands.Authors.DeleteAuthor;
+using Application.Commands.Authors.UpdateAuthor;
+using Application.Queries.Authors.GetAll;
+using Application.Queries.Authors.GetById;
 using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

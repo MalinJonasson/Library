@@ -1,5 +1,5 @@
-﻿using Application.Queries.GetAll;
-using Application.Queries.GetAllById;
+﻿using Application.Queries.Authors.GetAll;
+using Application.Queries.Authors.GetById;
 using Domain.Models;
 using Infrastructure.Database;
 

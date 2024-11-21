@@ -1,8 +1,6 @@
-﻿using Application.Commands.AddAuthor;
-using Application.Commands.DeleteAuthor;
-using Application.Commands.UpdateAuthor;
-using Application.Queries.GetAll;
-using Application.Queries.GetAllById;
+﻿using Application.Commands.Authors.AddAuthor;
+using Application.Commands.Authors.DeleteAuthor;
+using Application.Commands.Authors.UpdateAuthor;
 using Domain.Models;
 using Infrastructure.Database;
 

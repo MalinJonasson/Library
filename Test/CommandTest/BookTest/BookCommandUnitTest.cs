@@ -1,8 +1,6 @@
-﻿using Application.Commands.AddBook;
-using Application.Commands.DeleteBook;
-using Application.Commands.UpdateBook;
-using Application.Queries.GetAll;
-using Application.Queries.GetAllById;
+﻿using Application.Commands.Books.AddBook;
+using Application.Commands.Books.DeleteBook;
+using Application.Commands.Books.UpdateBook;
 using Domain.Models;
 using Infrastructure.Database;
 
@@ -87,6 +85,6 @@ namespace Test.CommandTest.BookTest
 
         }
 
-        
+
     }
 }
