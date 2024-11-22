@@ -14,6 +14,11 @@ namespace Application.Queries.Authors.GetById
         }
         public Task<Author> Handle(GetAuthorsByIdQuery request, CancellationToken cancellationToken)
         {
+            if (request == null || request.Id == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid ID or missing required fields");
+            }
+
             Author wantedAuthor = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == request.Id)!;
             return Task.FromResult(wantedAuthor);
         }

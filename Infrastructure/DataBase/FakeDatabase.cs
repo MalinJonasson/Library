@@ -1,14 +1,13 @@
 ﻿using Domain.Models;
-using System.Xml.Linq;
 
 namespace Infrastructure.Database
 {
     public class FakeDatabase
     {
-        public List<Book> Books 
-        { 
-            get { return allBooksFromDB; } 
-            set { allBooksFromDB = value; } 
+        public List<Book> Books
+        {
+            get { return allBooksFromDB; }
+            set { allBooksFromDB = value; }
         }
 
         List<Book> allBooksFromDB = new List<Book>()
@@ -20,10 +19,10 @@ namespace Infrastructure.Database
             new Book { Id = Guid.NewGuid(), Title = "Book5", Description = "AboutBook5" },
         };
 
-        public List<Author> Authors 
-        { 
-            get { return allAuthorsFromDB; } 
-            set { allAuthorsFromDB = value; } 
+        public List<Author> Authors
+        {
+            get { return allAuthorsFromDB; }
+            set { allAuthorsFromDB = value; }
         }
 
         List<Author> allAuthorsFromDB = new List<Author>()
@@ -35,9 +34,9 @@ namespace Infrastructure.Database
             new Author { Id = Guid.NewGuid(), Name = "Author5" },
         };
 
-        public List<User> Users 
-        { 
-            get { return allUsersFromDB; } 
+        public List<User> Users
+        {
+            get { return allUsersFromDB; }
             set { allUsersFromDB = value; }
         }
 

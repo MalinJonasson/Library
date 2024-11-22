@@ -15,7 +15,15 @@ namespace Application.Queries.Authors.GetAll
         public Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
         {
             List<Author> allAuthorsFromFakeDatabase = _fakeDatabase.Authors;
+
+            // Nullcheck för att hantera om _fakeDatabase.Authors är null
+            if (allAuthorsFromFakeDatabase == null || !allAuthorsFromFakeDatabase.Any())
+            {
+                throw new ArgumentException("Authorlist is empty or null");
+            }
+
             return Task.FromResult(allAuthorsFromFakeDatabase);
         }
+
     }
 }

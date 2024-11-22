@@ -16,6 +16,11 @@ namespace Application.Queries.Books.GetAll
         public Task<List<Book>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
         {
             List<Book> allBooksFromFakeDatabase = _fakeDatabase.Books;
+
+            if(allBooksFromFakeDatabase == null || !allBooksFromFakeDatabase.Any())
+    {
+                throw new ArgumentException("Booklist is empty or null");
+            }
             return Task.FromResult(allBooksFromFakeDatabase);
         }
     }
