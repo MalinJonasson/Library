@@ -1,8 +1,5 @@
-﻿using Application.Commands.AddBook;
-using Application.Commands.DeleteBook;
-using Application.Commands.UpdateBook;
-using Application.Queries.GetAll;
-using Application.Queries.GetAllById;
+﻿using Application.Queries.Books.GetAll;
+using Application.Queries.Books.GetById;
 using Domain.Models;
 using Infrastructure.Database;
 

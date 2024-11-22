@@ -5,8 +5,11 @@ namespace Infrastructure.Database
 {
     public class FakeDatabase
     {
-        public List<Book> Books { get { return allBooksFromDB; } set { allBooksFromDB = value; } }
-        public List<Author> Authors { get { return allAuthorsFromDB; } set { allAuthorsFromDB = value; } }
+        public List<Book> Books 
+        { 
+            get { return allBooksFromDB; } 
+            set { allBooksFromDB = value; } 
+        }
 
         List<Book> allBooksFromDB = new List<Book>()
         {
@@ -17,6 +20,11 @@ namespace Infrastructure.Database
             new Book { Id = Guid.NewGuid(), Title = "Book5", Description = "AboutBook5" },
         };
 
+        public List<Author> Authors 
+        { 
+            get { return allAuthorsFromDB; } 
+            set { allAuthorsFromDB = value; } 
+        }
 
         List<Author> allAuthorsFromDB = new List<Author>()
         {
@@ -27,43 +35,17 @@ namespace Infrastructure.Database
             new Author { Id = Guid.NewGuid(), Name = "Author5" },
         };
 
-        // My CRUD Methods
-
-        public Book AddNewBook(Book book)
-        {
-            allBooksFromDB.Add(book);
-            return book;
+        public List<User> Users 
+        { 
+            get { return allUsersFromDB; } 
+            set { allUsersFromDB = value; }
         }
 
-        public void GetBooksById()
+        List<User> allUsersFromDB = new List<User>()
         {
-
-        }
-
-        public void GetAllBooks()
-        {
-
-        }
-
-        public void UpdateBooks()
-        {
-
-        }
-
-        public void DeleteBook(Book book)
-        {
-            allBooksFromDB.Remove(book);
-        }
-
-        public Author AddNewAuhtor(Author author)
-        {
-            allAuthorsFromDB.Add(author);
-            return author;
-        }
-
-        public void DeleteAuthor(Author author)
-        {
-            allAuthorsFromDB.Remove(author);
-        }
+            new User { Id = Guid.NewGuid(), UserName = "User1" },
+            new User { Id = Guid.NewGuid(), UserName = "User2" },
+            new User { Id = Guid.NewGuid(), UserName = "User3" },
+        };
     }
 }
