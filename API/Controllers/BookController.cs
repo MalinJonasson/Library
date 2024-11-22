@@ -23,6 +23,7 @@ namespace API.Controllers
             _mediator = mediator;
         }
 
+        [Authorize]
         [HttpPost]
         [Route("addNewBook")]
         public async void AddNewBook([FromBody] Book bookToAdd)
@@ -31,7 +32,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        [Route("all")]
+        [Route("getAllBooks")]
         public async Task<IActionResult> GetAllBooks()
         {
             return Ok(await _mediator.Send(new GetAllBooksQuery()));

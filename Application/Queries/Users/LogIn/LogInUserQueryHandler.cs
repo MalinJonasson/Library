@@ -1,4 +1,5 @@
-﻿using Infrastructure.Database;
+﻿using Application.Queries.Users.LogIn.Helpers;
+using Infrastructure.Database;
 using MediatR;
 using System.Reflection.Metadata.Ecma335;
 
@@ -7,10 +8,12 @@ namespace Application.Queries.Users.LogIn
     public class LogInUserQueryHandler : IRequestHandler<LogInUserQuery, string>
     {
         private readonly FakeDatabase _fakeDatabase;
+        private readonly TokenHelper _tokenHelper;
 
-        public LogInUserQueryHandler(FakeDatabase fakeDatabase)
+        public LogInUserQueryHandler(FakeDatabase fakeDatabase, TokenHelper tokenHelper)
         {
             _fakeDatabase = fakeDatabase;
+            _tokenHelper = tokenHelper; 
         }
         public Task<string> Handle(LogInUserQuery request, CancellationToken cancellationToken)
         {
@@ -21,7 +24,7 @@ namespace Application.Queries.Users.LogIn
                 throw new UnauthorizedAccessException("Invalid username or password");
             }
 
-            string token = "Token To Return";
+            string token = _tokenHelper.GenerateJwtToken(user);
             return Task.FromResult(token);
         }
     }
