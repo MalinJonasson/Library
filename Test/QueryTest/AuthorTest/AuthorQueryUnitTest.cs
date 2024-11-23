@@ -1,5 +1,6 @@
 ﻿using Application.Queries.Authors.GetAll;
 using Application.Queries.Authors.GetById;
+using Application.Queries.Books.GetById;
 using Domain.Models;
 using Infrastructure.Database;
 
@@ -14,7 +15,6 @@ namespace Test.QueryTest.AuthorTest
         [SetUp]
         public void SetUp()
         {
-            // Initialize FakeDatabase and handler before each test
             _fakeDatabase = new FakeDatabase();
             _getAllAuthorsQueryHandler = new GetAllAuthorsQueryHandler(_fakeDatabase);
             _getAuthorsByIdQueryHandler = new GetAuthorsByIdQueryHandler(_fakeDatabase);
@@ -34,10 +34,10 @@ namespace Test.QueryTest.AuthorTest
             var result = await _getAllAuthorsQueryHandler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result, "The result should not be null.");
-            Assert.AreEqual(7, result.Count, "There should be 7 authors.");
-            Assert.Contains(author1, result, "The first author should be in the result.");
-            Assert.Contains(author2, result, "The second author should be in the result.");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(7, result.Count);
+            Assert.Contains(author1, result);
+            Assert.Contains(author2, result);
 
         }
 
@@ -46,20 +46,18 @@ namespace Test.QueryTest.AuthorTest
         {
             // Arrange
             var authorToReturnId = new Guid("fa7c2886-a981-43dc-9acb-666dcf9025e3");
-
-            // Lägg till en författare i _fakeDatabase med det ID:t
             var authorToReturn = new Author { Id = authorToReturnId, Name = "Test Author" };
-            _fakeDatabase.Authors.Add(authorToReturn); // Lägg till i databasen
+            _fakeDatabase.Authors.Add(authorToReturn);
 
-            // Skapa en instans av GetAuthorsByIdQuery med det ID:t
             var request = new GetAuthorsByIdQuery(authorToReturnId);
 
             // Act
-            var result = await _getAuthorsByIdQueryHandler.Handle(request, CancellationToken.None);  // Skicka queryn istället för ID:t direkt
+            var result = await _getAuthorsByIdQueryHandler.Handle(request, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result, "The returned author should not be null.");
-            Assert.AreEqual(authorToReturnId, result.Id, "The returned author's ID should match the requested author's ID.");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(authorToReturnId, result.Id);
         }
+
     }
 }

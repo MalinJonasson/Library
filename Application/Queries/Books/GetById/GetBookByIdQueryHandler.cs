@@ -20,6 +20,13 @@ namespace Application.Queries.Books.GetById
             }
 
             Book wantedBook = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id)!;
+
+            var author = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == wantedBook.AuthorId);
+            if (author != null)
+            {
+                wantedBook.Author = author;
+            }
+
             return Task.FromResult(wantedBook);
         }
     }

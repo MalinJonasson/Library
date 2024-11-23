@@ -1,6 +1,8 @@
 ﻿using Application.Commands.Authors.AddAuthor;
 using Application.Commands.Authors.DeleteAuthor;
 using Application.Commands.Authors.UpdateAuthor;
+using Application.Commands.Books.AddBook;
+using Application.Queries.Books.GetById;
 using Domain.Models;
 using Infrastructure.Database;
 
@@ -45,19 +47,17 @@ namespace Test.CommandTest.AuthorTest
             // Arrange
             var authorToDeleteId = new Guid("fa7c2886-a981-43dc-9acb-666dcf9025e3");
 
-            // Lägg till en författare i _fakeDatabase med det ID:t
             var authorToDelete = new Author { Id = authorToDeleteId, Name = "Test Author" };
-            _fakeDatabase.Authors.Add(authorToDelete); // Lägg till i databasen
+            _fakeDatabase.Authors.Add(authorToDelete);
 
-            // Skapa en instans av GetAuthorsByIdQuery med det ID:t
             var request = new DeleteAuthorByIdCommand(authorToDeleteId);
             // Act
             var result = await _deleteAuthorCommandHandler.Handle(request, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result, "The returned author should not be null."); // Författaren som togs bort ska returneras
-            Assert.AreEqual(authorToDeleteId, result.Id, "The returned author's ID should match the deleted author's ID.");
-            Assert.IsFalse(_fakeDatabase.Authors.Any(a => a.Id == authorToDeleteId), "The author should be removed from the database.");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(authorToDeleteId, result.Id);
+            Assert.IsFalse(_fakeDatabase.Authors.Any(a => a.Id == authorToDeleteId));
 
         }
 
@@ -66,16 +66,15 @@ namespace Test.CommandTest.AuthorTest
         public async Task Handle_ShouldUpdateOldAuthorNameByIdFromFakeDatabaseAndReturnNewAuthorName()
         {
             // Arrange
-            var authorToUpdateId = Guid.NewGuid(); // Generera ett nytt GUID för den nya författaren
+            var authorToUpdateId = Guid.NewGuid();
             var existingAuthor = new Author { Id = authorToUpdateId, Name = "Old Name" };
 
-            _fakeDatabase.Authors.Add(existingAuthor); // Lägg till den skapade författaren i databasen
+            _fakeDatabase.Authors.Add(existingAuthor);
 
-            var updatedAuthor = new Author { Name = "Updated Name" }; // Författaren ska uppdatera sitt namn
-            var request = new UpdateAuthorByIdCommand(updatedAuthor, authorToUpdateId); // Skapa kommandot för uppdatering
-
+            var updatedAuthor = new Author { Name = "Updated Name" };
+            var request = new UpdateAuthorByIdCommand(updatedAuthor, authorToUpdateId);
             // Act
-            var result = await _updateAuthorCommandHandler.Handle(request, CancellationToken.None); // Kör hanteraren
+            var result = await _updateAuthorCommandHandler.Handle(request, CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result, "The result should not be null.");
@@ -83,7 +82,5 @@ namespace Test.CommandTest.AuthorTest
             Assert.AreEqual(updatedAuthor.Name, result.Name, "The author's name should be updated.");
 
         }
-
-
     }
 }

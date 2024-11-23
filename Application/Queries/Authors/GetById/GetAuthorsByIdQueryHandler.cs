@@ -20,6 +20,7 @@ namespace Application.Queries.Authors.GetById
             }
 
             Author wantedAuthor = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == request.Id)!;
+
             return Task.FromResult(wantedAuthor);
         }
     }

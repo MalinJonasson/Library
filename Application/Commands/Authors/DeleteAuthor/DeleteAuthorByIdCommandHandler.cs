@@ -27,10 +27,7 @@ namespace Application.Commands.Authors.DeleteAuthor
 
             _fakeDatabase.Authors.Remove(authorToDelete);
 
-            return Task.FromResult(authorToDelete);
-
-
-           
+            return Task.FromResult(authorToDelete);           
 
         }
     }

@@ -20,17 +20,26 @@ namespace Application.Commands.Books.UpdateBook
             {
                 throw new ArgumentException("Invalid ID or missing required fields");
             }
+            Book bookToUpdate = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id);
 
-            Book bookToUpdate = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id)!;
+            bookToUpdate.Title = request.UpdatedBook.Title;
+            bookToUpdate.Description = request.UpdatedBook.Description;
 
-            if (bookToUpdate == null && string.IsNullOrWhiteSpace(request.UpdatedBook.Title))
+            if (request.UpdatedBook.AuthorId != Guid.Empty)
             {
-                bookToUpdate.Title = request.UpdatedBook.Title;
-                bookToUpdate.Description = request.UpdatedBook.Description;
-                return Task.FromResult(bookToUpdate);
+                var authorToAddToBook = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == request.UpdatedBook.AuthorId);
+
+                if (authorToAddToBook == null)
+                {
+                    throw new ArgumentException("Invalid AuthorId, no author found with the provided ID");
+                }
+
+                bookToUpdate.AuthorId = authorToAddToBook.Id;
+                bookToUpdate.Author = authorToAddToBook;
             }
 
-            throw new ArgumentNullException("Book not found or name cannot be empty");
+            return Task.FromResult(bookToUpdate);
         }
+
     }
 }

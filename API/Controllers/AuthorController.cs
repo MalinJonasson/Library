@@ -27,14 +27,13 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new AddAuthorCommand(authorToAdd));
+                var authorToBeAdded = await _mediator.Send(new AddAuthorCommand(authorToAdd));
+                return Ok(authorToBeAdded);
             }
             catch (Exception ex) 
             {
                 return BadRequest(ex.Message);
             }
-
-            return Ok();
 
         }
 
@@ -44,13 +43,13 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new GetAllAuthorsQuery());
+                var allAuthors = await _mediator.Send(new GetAllAuthorsQuery());
+                return Ok(allAuthors);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return Ok();
         }
 
         [HttpGet]
@@ -59,13 +58,13 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new GetAuthorsByIdQuery(authorId));
+               var getAuthorById = await _mediator.Send(new GetAuthorsByIdQuery(authorId));
+                return Ok(getAuthorById);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return Ok();
         }
 
         [Authorize]
@@ -75,7 +74,8 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new UpdateAuthorByIdCommand(updatedAuthor, updatedAuthorId));
+                var authorToUpdate = await _mediator.Send(new UpdateAuthorByIdCommand(updatedAuthor, updatedAuthorId));
+                return Ok(authorToUpdate);
             }
             catch (ArgumentNullException ex)
             {
@@ -85,8 +85,7 @@ namespace API.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            
-            return Ok();           
+                      
             
         }
 
@@ -97,7 +96,8 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new DeleteAuthorByIdCommand(authorToDeleteId));
+                var authorToDelete = await _mediator.Send(new DeleteAuthorByIdCommand(authorToDeleteId));
+                return Ok(authorToDelete);
             }
             catch (ArgumentException ex)
             {
@@ -105,7 +105,6 @@ namespace API.Controllers
 
             }
 
-            return Ok();
         }
     }
 }

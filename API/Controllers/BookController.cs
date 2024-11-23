@@ -27,14 +27,14 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new AddBookCommand(bookToAdd));
+                var bookToBeAdded = await _mediator.Send(new AddBookCommand(bookToAdd));
+                return Ok(bookToBeAdded);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
 
-           return Ok();
         }
 
         [HttpGet]
@@ -43,13 +43,13 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new GetAllBooksQuery());
+                var allBooks = await _mediator.Send(new GetAllBooksQuery());
+                return Ok(allBooks);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return Ok();
         }
 
         [HttpGet]
@@ -58,13 +58,14 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new GetBookByIdQuery(bookId));
+                var bookToGetById = await _mediator.Send(new GetBookByIdQuery(bookId));
+                return Ok(bookToGetById);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return Ok();
+            
         }
 
         [Authorize]
@@ -74,7 +75,8 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new UpdateBookByIdCommand(updatedBook, updatedBookId));
+                var bookToUpdate = await _mediator.Send(new UpdateBookByIdCommand(updatedBook, updatedBookId));
+                return Ok();
             }
             catch (ArgumentNullException ex)
             {
@@ -84,7 +86,6 @@ namespace API.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            return Ok();
         }
 
         [Authorize]
@@ -94,13 +95,13 @@ namespace API.Controllers
         {
             try
             {
-                await _mediator.Send(new DeleteBookByIdCommand(bookToDeleteId));
+                var bookToDelete = await _mediator.Send(new DeleteBookByIdCommand(bookToDeleteId));
+                return Ok();
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return Ok();
         }
 
     }

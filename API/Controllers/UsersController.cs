@@ -22,21 +22,47 @@ namespace API.Controllers
         [Route("getAllUsers")]
         public async Task<IActionResult> GetAllUsers()
         {
-            return Ok(await _mediator.Send(new GetAllUsersQuery()));
+            try
+            {
+                var getAllUsers =  await _mediator.Send(new GetAllUsersQuery());
+                return Ok(getAllUsers);
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost]
         [Route("Register")]
         public async Task<IActionResult> RegisterUser([FromBody] User userToAdd)
         {
-            return Ok(await _mediator.Send(new AddUserCommand(userToAdd)));
+            try
+            {
+                var userToBeAdded = await _mediator.Send(new AddUserCommand(userToAdd));
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> LogIn([FromBody] User userToLogIn)
         {
-            return Ok(await _mediator.Send(new LogInUserQuery(userToLogIn)));
+            try
+            {
+                var userToBeLoggedIn = await _mediator.Send(new LogInUserQuery(userToLogIn));
+                return Ok(userToBeLoggedIn);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
