@@ -14,12 +14,12 @@ namespace Application.Commands.Books.DeleteBook
         }
         public Task<Book> Handle(DeleteBookByIdCommand request, CancellationToken cancellationToken)
         {
-            Book? bookToDelete = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id);
-
-            if (bookToDelete == null)
+            if (request == null || request.Id == Guid.Empty)
             {
-                return Task.FromResult<Book>(null!);
+                throw new ArgumentException("Invalid ID or missing required fields");
             }
+
+            Book? bookToDelete = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id);
 
             _fakeDatabase.Books.Remove(bookToDelete);
 

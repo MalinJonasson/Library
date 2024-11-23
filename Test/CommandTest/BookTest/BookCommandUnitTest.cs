@@ -3,6 +3,7 @@ using Application.Commands.Books.DeleteBook;
 using Application.Commands.Books.UpdateBook;
 using Domain.Models;
 using Infrastructure.Database;
+using System.Linq;
 
 namespace Test.CommandTest.BookTest
 {
@@ -17,7 +18,6 @@ namespace Test.CommandTest.BookTest
         [SetUp]
         public void SetUp()
         {
-            // Initialize FakeDatabase and handler before each test
             _fakeDatabase = new FakeDatabase();
             _addBookCommandHandler = new AddBookCommandHandler(_fakeDatabase);
             _deleteBookByIdCommandHandler = new DeleteBookByIdCommandHandler(_fakeDatabase);
@@ -25,20 +25,24 @@ namespace Test.CommandTest.BookTest
         }
 
         [Test]
-        public async Task Handle_ShouldAddBookToFakeDatabaseAndReturnBook()
+        public async Task Handle_ShouldAddBookToFakeDatabaseAndReturnBookWithCorrectAuthor()
         {
             // Arrange
-            var newBook = new Book { Title = "Test Book" };
+            var author = _fakeDatabase.Authors.FirstOrDefault();
+            var newBook = new Book { Title = "Test Book", Description = "Test description", AuthorId = author.Id };
             var request = new AddBookCommand(newBook);
 
             // Act
             var result = await _addBookCommandHandler.Handle(request, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result, "The returned book should not be null.");
-            Assert.AreEqual(newBook.Title, result.Title, "The book's tilte should match the input.");
-            Assert.IsTrue(_fakeDatabase.Books.Contains(result), "The book should be added to the database.");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(newBook.Title, result.Title);
+            Assert.AreEqual(author.Id, result.AuthorId);
+            Assert.IsTrue(_fakeDatabase.Books.Contains(result));
+            Assert.AreEqual(author.Name, result.Author.Name);
         }
+
 
         [Test]
         public async Task Handle_ShouldDeleteBookFromFakeDatabaseAndReturnBook()
@@ -46,45 +50,86 @@ namespace Test.CommandTest.BookTest
             // Arrange
             var bookToDeleteId = new Guid("fa7c2886-a981-43dc-9acb-666dcf9025e3");
 
-            // Lägg till en bok i _fakeDatabase med det ID:t
             var bookToDelete = new Book { Id = bookToDeleteId, Title = "Test Book" };
-            _fakeDatabase.Books.Add(bookToDelete); // Lägg till i databasen
+            _fakeDatabase.Books.Add(bookToDelete);
 
-            // Skapa en instans av GetAuthorsByIdQuery med det ID:t
             var request = new DeleteBookByIdCommand(bookToDeleteId);
             // Act
             var result = await _deleteBookByIdCommandHandler.Handle(request, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result, "The returned book should not be null."); // boken som togs bort ska returneras
-            Assert.AreEqual(bookToDeleteId, result.Id, "The returned book's ID should match the deleted book's ID.");
-            Assert.IsFalse(_fakeDatabase.Books.Any(b => b.Id == bookToDeleteId), "The book should be removed from the database.");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(bookToDeleteId, result.Id);
+            Assert.IsFalse(_fakeDatabase.Books.Any(b => b.Id == bookToDeleteId));
 
         }
 
 
         [Test]
-        public async Task Handle_ShouldUpdateOldBooksNameByIdFromFakeDatabaseAndReturnNewBooksName()
+        public async Task Handle_ShouldUpdateBookTitleAndDescription()
         {
             // Arrange
-            var bookToUpdateId = Guid.NewGuid(); // Generera ett nytt GUID för den nya boken
-            var existingbook = new Book { Id = bookToUpdateId, Title = "Old book name" };
+            var bookToUpdateId = Guid.NewGuid();
+            var existingBook = new Book
+            {
+                Id = bookToUpdateId,
+                Title = "Old Title",
+                Description = "Old Description"
+            };
+            _fakeDatabase.Books.Add(existingBook);
 
-            _fakeDatabase.Books.Add(existingbook); // Lägg till den skapade boken i databasen
-
-            var updatedBook = new Book { Title = "Updated book name" }; // boken ska uppdatera sitt namn
-            var request = new UpdateBookByIdCommand(updatedBook, bookToUpdateId); // Skapa kommandot för uppdatering
+            var updatedBook = new Book
+            {
+                Title = "Updated Title",
+                Description = "Updated Description"
+            };
+            var request = new UpdateBookByIdCommand(updatedBook, bookToUpdateId);
 
             // Act
-            var result = await _updateBookByIdCommandHandler.Handle(request, CancellationToken.None); // Kör hanteraren
+            var result = await _updateBookByIdCommandHandler.Handle(request, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result, "The result should not be null.");
-            Assert.AreEqual(bookToUpdateId, result.Id, "The books's ID should match the updated ID.");
-            Assert.AreEqual(updatedBook.Title, result.Title, "The books's name should be updated.");
-
+            Assert.AreEqual(updatedBook.Title, result.Title);
+            Assert.AreEqual(updatedBook.Description, result.Description);
         }
 
+        [Test]
+        public async Task Handle_ShouldUpdateAuthorOfBook()
+        {
+            // Arrange
+            var bookToUpdateId = Guid.NewGuid();
+            var authorId = Guid.NewGuid();
+
+            var existingBook = new Book
+            {
+                Id = bookToUpdateId,
+                Title = "Old Title",
+                Description = "Old Description",
+                AuthorId = Guid.Empty
+            };
+            var existingAuthor = new Author
+            {
+                Id = authorId,
+                Name = "New Author"
+            };
+            _fakeDatabase.Books.Add(existingBook);
+            _fakeDatabase.Authors.Add(existingAuthor);
+
+            var updatedBook = new Book
+            {
+                Title = "Updated Title",
+                Description = "Updated Description",
+                AuthorId = authorId
+            };
+            var request = new UpdateBookByIdCommand(updatedBook, bookToUpdateId);
+
+            // Act
+            var result = await _updateBookByIdCommandHandler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(authorId, result.AuthorId);
+            Assert.AreEqual(existingAuthor, result.Author);
+        }
 
     }
 }

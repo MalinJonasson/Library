@@ -17,16 +17,18 @@ namespace Application.Commands.Authors.DeleteAuthor
 
         public Task<Author> Handle(DeleteAuthorByIdCommand request, CancellationToken cancellationToken)
         {
-            Author? authorToDelete = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == request.Id);
 
-            if (authorToDelete == null)
+            if (request == null || request.Id == Guid.Empty)
             {
-                return Task.FromResult<Author>(null!);
+                throw new ArgumentException("Invalid ID or missing required fields");
             }
+
+            Author? authorToDelete = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == request.Id);
 
             _fakeDatabase.Authors.Remove(authorToDelete);
 
-            return Task.FromResult(authorToDelete);
+            return Task.FromResult(authorToDelete);           
+
         }
     }
 }

@@ -15,6 +15,12 @@ namespace Application.Queries.Users.GetAll
         public Task<List<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
             List<User> allUsersFromFakeDatabase = _fakeDatabase.Users;
+
+            if (allUsersFromFakeDatabase == null || !allUsersFromFakeDatabase.Any())
+            {
+                throw new ArgumentException("Userlist is empty or null");
+            }
+
             return Task.FromResult(allUsersFromFakeDatabase);
         }
     }

@@ -34,10 +34,10 @@ namespace Test.QueryTest.BookTest
             var result = await _getAllBooksQueryHandler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result, "The result should not be null.");
-            Assert.AreEqual(7, result.Count, "There should be 7 books.");
-            Assert.Contains(book1, result, "The first book should be in the result.");
-            Assert.Contains(book2, result, "The second book should be in the result.");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(7, result.Count);
+            Assert.Contains(book1, result);
+            Assert.Contains(book2, result);
 
         }
 
@@ -46,20 +46,56 @@ namespace Test.QueryTest.BookTest
         {
             // Arrange
             var bookToReturnId = new Guid("fa7c2886-a981-43dc-9acb-666dcf9025e3");
-
-            // Lägg till en boken i _fakeDatabase med det ID:t
             var bookToReturn = new Book { Id = bookToReturnId, Title = "Test Book" };
-            _fakeDatabase.Books.Add(bookToReturn); // Lägg till i databasen
+            _fakeDatabase.Books.Add(bookToReturn);
 
-            // Skapa en instans av GetBookByIdQuery med det ID:t
             var request = new GetBookByIdQuery(bookToReturnId);
 
             // Act
-            var result = await _getBookByIdQueryHandler.Handle(request, CancellationToken.None);  // Skicka queryn istället för ID:t direkt
+            var result = await _getBookByIdQueryHandler.Handle(request, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result, "The returned book should not be null.");
-            Assert.AreEqual(bookToReturnId, result.Id, "The returned book's ID should match the requested book's ID.");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(bookToReturnId, result.Id);
         }
+
+        [Test]
+        public async Task Handle_ShouldReturnBookWithAuthor_WhenBookHasValidAuthorId()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var authorId = Guid.NewGuid();
+
+            var author = new Author
+            {
+                Id = authorId,
+                Name = "Test Author"
+            };
+            _fakeDatabase.Authors.Add(author);
+
+            var book = new Book
+            {
+                Id = bookId,
+                Title = "Test Book",
+                Description = "Test Description",
+                AuthorId = authorId
+            };
+            _fakeDatabase.Books.Add(book);
+
+            var request = new GetBookByIdQuery(bookId);
+
+            // Act
+            var result = await _getBookByIdQueryHandler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(bookId, result.Id);
+            Assert.AreEqual(authorId, result.AuthorId);
+            Assert.IsNotNull(result.Author);
+            Assert.AreEqual(author.Name, result.Author.Name);
+        }
+
     }
+
 }
+

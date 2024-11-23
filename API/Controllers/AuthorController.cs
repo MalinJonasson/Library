@@ -14,10 +14,7 @@ namespace API.Controllers
     [Route("[controller]")]
     public class AuthorController : Controller
     {
-        //CRUD GET UPDATE/PUT/PATCH POST DELETE
-
         internal readonly IMediator _mediator;
-
         public AuthorController(IMediator mediator)
         {
             _mediator = mediator;
@@ -26,23 +23,48 @@ namespace API.Controllers
         [Authorize]
         [HttpPost]
         [Route("addNewAuthor")]
-        public async void AddNewAuthor([FromBody] Author authorToAdd)
+        public async Task<IActionResult> AddNewAuthor([FromBody] Author authorToAdd)
         {
-            await _mediator.Send(new AddAuthorCommand(authorToAdd));
+            try
+            {
+                var authorToBeAdded = await _mediator.Send(new AddAuthorCommand(authorToAdd));
+                return Ok(authorToBeAdded);
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpGet]
         [Route("getAllAuthors")]
         public async Task<IActionResult> GetAllAuthors()
         {
-            return Ok(await _mediator.Send(new GetAllAuthorsQuery()));
+            try
+            {
+                var allAuthors = await _mediator.Send(new GetAllAuthorsQuery());
+                return Ok(allAuthors);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
         [Route("{authorId}")]
         public async Task<IActionResult> GetAuthorsById(Guid authorId)
         {
-            return Ok(await _mediator.Send(new GetAuthorsByIdQuery(authorId)));
+            try
+            {
+               var getAuthorById = await _mediator.Send(new GetAuthorsByIdQuery(authorId));
+                return Ok(getAuthorById);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [Authorize]
@@ -50,7 +72,21 @@ namespace API.Controllers
         [Route("updateAuthor/{updatedAuthorId}")]
         public async Task<IActionResult> UpdateAuthor([FromBody] Author updatedAuthor, Guid updatedAuthorId)
         {
-            return Ok(await _mediator.Send(new UpdateAuthorByIdCommand(updatedAuthor, updatedAuthorId)));
+            try
+            {
+                var authorToUpdate = await _mediator.Send(new UpdateAuthorByIdCommand(updatedAuthor, updatedAuthorId));
+                return Ok(authorToUpdate);
+            }
+            catch (ArgumentNullException ex)
+            {
+               return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+                      
+            
         }
 
         [Authorize]
@@ -58,7 +94,17 @@ namespace API.Controllers
         [Route("deleteAuthor/{authorToDeleteId}")]
         public async Task<IActionResult> DeleteAuthor([FromBody] Guid authorToDeleteId)
         {
-            return Ok(await _mediator.Send(new DeleteAuthorByIdCommand(authorToDeleteId)));
+            try
+            {
+                var authorToDelete = await _mediator.Send(new DeleteAuthorByIdCommand(authorToDeleteId));
+                return Ok(authorToDelete);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+
+            }
+
         }
     }
 }

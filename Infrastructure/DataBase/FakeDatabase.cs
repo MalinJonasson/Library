@@ -1,29 +1,28 @@
 ﻿using Domain.Models;
-using System.Xml.Linq;
 
 namespace Infrastructure.Database
 {
     public class FakeDatabase
     {
-        public List<Book> Books 
-        { 
-            get { return allBooksFromDB; } 
-            set { allBooksFromDB = value; } 
+        public List<Book> Books
+        {
+            get { return allBooksFromDB; }
+            set { allBooksFromDB = value; }
         }
 
         List<Book> allBooksFromDB = new List<Book>()
         {
-            new Book { Id = Guid.NewGuid(), Title = "Book1", Description = "AboutBook1" },
-            new Book { Id = Guid.NewGuid(), Title = "Book2", Description = "AboutBook2" },
-            new Book { Id = Guid.NewGuid(), Title = "Book3", Description = "AboutBook3" },
-            new Book { Id = Guid.NewGuid(), Title = "Book4", Description = "AboutBook4" },
-            new Book { Id = Guid.NewGuid(), Title = "Book5", Description = "AboutBook5" },
+            new Book { Id = Guid.NewGuid(), Title = "Book1", Description = "AboutBook1", AuthorId = Guid.NewGuid() },
+            new Book { Id = Guid.NewGuid(), Title = "Book2", Description = "AboutBook2", AuthorId = Guid.NewGuid() },
+            new Book { Id = Guid.NewGuid(), Title = "Book3", Description = "AboutBook3", AuthorId = Guid.NewGuid() },
+            new Book { Id = Guid.NewGuid(), Title = "Book4", Description = "AboutBook4", AuthorId = Guid.NewGuid() },
+            new Book { Id = Guid.NewGuid(), Title = "Book5", Description = "AboutBook5", AuthorId = Guid.NewGuid() },
         };
 
-        public List<Author> Authors 
-        { 
-            get { return allAuthorsFromDB; } 
-            set { allAuthorsFromDB = value; } 
+        public List<Author> Authors
+        {
+            get { return allAuthorsFromDB; }
+            set { allAuthorsFromDB = value; }
         }
 
         List<Author> allAuthorsFromDB = new List<Author>()
@@ -35,9 +34,9 @@ namespace Infrastructure.Database
             new Author { Id = Guid.NewGuid(), Name = "Author5" },
         };
 
-        public List<User> Users 
-        { 
-            get { return allUsersFromDB; } 
+        public List<User> Users
+        {
+            get { return allUsersFromDB; }
             set { allUsersFromDB = value; }
         }
 
