@@ -1,16 +1,16 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Authors.AddAuthor
 {
     public class AddAuthorCommandHandler : IRequestHandler<AddAuthorCommand, Author>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IAuthorRepository _authorRepository;
 
-        public AddAuthorCommandHandler(FakeDatabase fakeDatabase)
+        public AddAuthorCommandHandler(IAuthorRepository authorRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _authorRepository = authorRepository;
         }
 
         public Task<Author> Handle(AddAuthorCommand request, CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ namespace Application.Commands.Authors.AddAuthor
                 Name = request.NewAuthor.Name
             };
 
-            _fakeDatabase.Authors.Add(authorToCreate);
+            _authorRepository.AddAuthor(authorToCreate);
 
             return Task.FromResult(authorToCreate);
         }

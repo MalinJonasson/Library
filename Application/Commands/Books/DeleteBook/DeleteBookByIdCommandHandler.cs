@@ -1,29 +1,34 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Books.DeleteBook
 {
     public class DeleteBookByIdCommandHandler : IRequestHandler<DeleteBookByIdCommand, Book>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IBookRepository _bookRepository;
 
-        public DeleteBookByIdCommandHandler(FakeDatabase fakeDatabase)
+        public DeleteBookByIdCommandHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
-        public Task<Book> Handle(DeleteBookByIdCommand request, CancellationToken cancellationToken)
+        public async Task<Book> Handle(DeleteBookByIdCommand request, CancellationToken cancellationToken)
         {
             if (request == null || request.Id == Guid.Empty)
             {
                 throw new ArgumentException("Invalid ID or missing required fields");
             }
 
-            Book? bookToDelete = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id);
+            Book bookToDelete = await _bookRepository.GetBookById(request.Id);
 
-            _fakeDatabase.Books.Remove(bookToDelete);
+            if (bookToDelete == null)
+            {
+                throw new KeyNotFoundException($"Book with ID {request.Id} was not found.");
+            }
 
-            return Task.FromResult(bookToDelete);
+            await _bookRepository.DeleteBookById(request.Id);
+
+            return bookToDelete;
         }
     }
 }

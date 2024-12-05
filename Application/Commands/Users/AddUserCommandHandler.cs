@@ -1,16 +1,17 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Users
 {
     public class AddUserCommandHandler : IRequestHandler<AddUserCommand, User>
     {
-        private readonly FakeDatabase _fakeDatabase;
 
-        public AddUserCommandHandler(FakeDatabase fakeDatabase)
+        private readonly IUserRepository _userRepository;
+
+        public AddUserCommandHandler(IUserRepository userRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _userRepository = userRepository;
         }
         public Task<User> Handle(AddUserCommand request, CancellationToken cancellationToken)
         {
@@ -28,8 +29,7 @@ namespace Application.Commands.Users
                 Password = request.NewUser.Password,
             };
 
-            _fakeDatabase.Users.Add(userToCreate);
-
+            _userRepository.AddUser(userToCreate);
             return Task.FromResult(userToCreate);
         }
     }

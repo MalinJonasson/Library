@@ -12,11 +12,11 @@ namespace Infrastructure.Database
 
         List<Book> allBooksFromDB = new List<Book>()
         {
-            new Book { Id = Guid.NewGuid(), Title = "Book1", Description = "AboutBook1", AuthorId = Guid.NewGuid() },
-            new Book { Id = Guid.NewGuid(), Title = "Book2", Description = "AboutBook2", AuthorId = Guid.NewGuid() },
-            new Book { Id = Guid.NewGuid(), Title = "Book3", Description = "AboutBook3", AuthorId = Guid.NewGuid() },
-            new Book { Id = Guid.NewGuid(), Title = "Book4", Description = "AboutBook4", AuthorId = Guid.NewGuid() },
-            new Book { Id = Guid.NewGuid(), Title = "Book5", Description = "AboutBook5", AuthorId = Guid.NewGuid() },
+            new Book { Id = Guid.NewGuid(), Title = "Book1", Description = "AboutBook1"},
+            new Book { Id = Guid.NewGuid(), Title = "Book2", Description = "AboutBook2"},
+            new Book { Id = Guid.NewGuid(), Title = "Book3", Description = "AboutBook3"},
+            new Book { Id = Guid.NewGuid(), Title = "Book4", Description = "AboutBook4"},
+            new Book { Id = Guid.NewGuid(), Title = "Book5", Description = "AboutBook5"},
         };
 
         public List<Author> Authors

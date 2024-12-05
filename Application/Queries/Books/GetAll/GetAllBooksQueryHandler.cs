@@ -1,36 +1,28 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Queries.Books.GetAll
 {
     public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, List<Book>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IBookRepository _bookRepository;
 
-        public GetAllBooksQueryHandler(FakeDatabase fakeDatabase)
+        public GetAllBooksQueryHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
 
-        public Task<List<Book>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
+        public async Task<List<Book>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
         {
-            List<Book> allBooksFromFakeDatabase = _fakeDatabase.Books;
+            List<Book> allBooks = await _bookRepository.GetAllBooks();
 
-            if(allBooksFromFakeDatabase == null || !allBooksFromFakeDatabase.Any())
+            if (allBooks == null || !allBooks.Any())
             {
                 throw new ArgumentException("Booklist is empty or null");
             }
 
-            foreach (var book in allBooksFromFakeDatabase)
-            {
-                var authorToGet = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == book.AuthorId);
-                if (authorToGet != null)
-                { 
-                    book.Author = authorToGet;
-                }
-            }
-            return Task.FromResult(allBooksFromFakeDatabase);
+            return allBooks;
         }
     }
 }

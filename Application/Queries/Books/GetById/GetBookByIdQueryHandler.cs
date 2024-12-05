@@ -1,33 +1,34 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Queries.Books.GetById
 {
     public class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, Book>
     {
-        private readonly FakeDatabase _fakeDatabase;
 
-        public GetBookByIdQueryHandler(FakeDatabase fakeDatabase)
+        private readonly IBookRepository _bookRepository;
+
+        public GetBookByIdQueryHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
-        public Task<Book> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
+
+        public async Task<Book> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
         {
             if (request == null || request.Id == Guid.Empty)
             {
                 throw new ArgumentException("Invalid ID or missing required fields");
             }
 
-            Book wantedBook = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id)!;
+            Book wantedBook = await _bookRepository.GetBookById(request.Id);
 
-            var author = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == wantedBook.AuthorId);
-            if (author != null)
+            if (wantedBook == null)
             {
-                wantedBook.Author = author;
+                throw new KeyNotFoundException($"Book with ID {request.Id} was not found.");
             }
 
-            return Task.FromResult(wantedBook);
+            return wantedBook;
         }
     }
 }

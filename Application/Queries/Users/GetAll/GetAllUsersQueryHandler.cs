@@ -1,27 +1,27 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Queries.Users.GetAll
 {
     public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<User>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IUserRepository _userRepository;
 
-        public GetAllUsersQueryHandler(FakeDatabase fakeDatabase)
+        public GetAllUsersQueryHandler(IUserRepository userRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _userRepository = userRepository;
         }
-        public Task<List<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<List<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            List<User> allUsersFromFakeDatabase = _fakeDatabase.Users;
+            List<User> allUsers = await _userRepository.GetAllUsers();
 
-            if (allUsersFromFakeDatabase == null || !allUsersFromFakeDatabase.Any())
+            if (allUsers == null || !allUsers.Any())
             {
                 throw new ArgumentException("Userlist is empty or null");
             }
 
-            return Task.FromResult(allUsersFromFakeDatabase);
+            return allUsers;
         }
     }
 }

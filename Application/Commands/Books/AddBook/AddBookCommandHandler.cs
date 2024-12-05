@@ -1,16 +1,16 @@
-﻿using MediatR;
+﻿using Application.Interfaces.RepositoryInterfaces;
 using Domain.Models;
-using Infrastructure.Database;
+using MediatR;
 
 namespace Application.Commands.Books.AddBook
 {
     public class AddBookCommandHandler : IRequestHandler<AddBookCommand, Book>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IBookRepository _bookRepository;
 
-        public AddBookCommandHandler(FakeDatabase fakeDatabase)
+        public AddBookCommandHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
 
         public Task<Book> Handle(AddBookCommand request, CancellationToken cancellationToken)
@@ -22,22 +22,14 @@ namespace Application.Commands.Books.AddBook
                 throw new ArgumentException("Author name and description cannot be empty or null");
             }
 
-            var author = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == request.NewBook.AuthorId);
-            if (author == null)
-            {
-                throw new ArgumentException("Invalid AuthorId, no author found with the provided ID");
-            }
-
             Book bookToCreate = new()
             {
                 Id = Guid.NewGuid(),
                 Title = request.NewBook.Title,
                 Description = request.NewBook.Description,
-                AuthorId = request.NewBook.AuthorId,
-                Author = author
             };
 
-            _fakeDatabase.Books.Add(bookToCreate);
+            _bookRepository.AddBook(bookToCreate);
 
             return Task.FromResult(bookToCreate);
         }

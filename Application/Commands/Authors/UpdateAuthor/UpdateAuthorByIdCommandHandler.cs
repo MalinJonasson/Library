@@ -1,5 +1,5 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Authors.UpdateAuthor
@@ -7,31 +7,32 @@ namespace Application.Commands.Authors.UpdateAuthor
     public class UpdateAuthorByIdCommandHandler : IRequestHandler<UpdateAuthorByIdCommand, Author>
     {
 
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IAuthorRepository _authorRepository;
 
-
-        public UpdateAuthorByIdCommandHandler(FakeDatabase fakeDatabase)
+        public UpdateAuthorByIdCommandHandler(IAuthorRepository authorRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _authorRepository = authorRepository;
         }
 
-        public Task<Author> Handle(UpdateAuthorByIdCommand request, CancellationToken cancellationToken)
+        public async Task<Author> Handle(UpdateAuthorByIdCommand request, CancellationToken cancellationToken)
         {
-            if (request == null || request.Id == Guid.Empty ||
-                string.IsNullOrWhiteSpace(request.UpdatedAuthor.Name))
+            if (request == null || request.Id == Guid.Empty || string.IsNullOrWhiteSpace(request.UpdatedAuthor.Name))
             {
                 throw new ArgumentException("Invalid ID or missing required fields");
             }
 
-            Author authorToUpdate = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == request.Id)!;
+            Author existingAuthor = await _authorRepository.GetAuthorById(request.Id);
 
-            if (authorToUpdate != null && !string.IsNullOrWhiteSpace(request.UpdatedAuthor.Name))
+            if (existingAuthor == null)
             {
-                authorToUpdate.Name = request.UpdatedAuthor.Name;
-                return Task.FromResult(authorToUpdate);
+                throw new KeyNotFoundException($"Author with ID {request.Id} was not found.");
             }
 
-            throw new ArgumentNullException("Author not found or name cannot be empty");
+            existingAuthor.Name = request.UpdatedAuthor.Name;
+
+            Author updatedAuthor = await _authorRepository.UpdateAuthorById(request.Id, existingAuthor);
+
+            return updatedAuthor;
 
         }
     }

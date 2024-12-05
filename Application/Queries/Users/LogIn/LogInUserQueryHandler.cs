@@ -1,30 +1,36 @@
-﻿using Application.Queries.Users.LogIn.Helpers;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Application.Queries.Users.LogIn.Helpers;
 using MediatR;
 
 namespace Application.Queries.Users.LogIn
 {
     public class LogInUserQueryHandler : IRequestHandler<LogInUserQuery, string>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IUserRepository _userRepository;
         private readonly TokenHelper _tokenHelper;
 
-        public LogInUserQueryHandler(FakeDatabase fakeDatabase, TokenHelper tokenHelper)
+        public LogInUserQueryHandler(IUserRepository userRepository, TokenHelper tokenHelper)
         {
-            _fakeDatabase = fakeDatabase;
+            _userRepository = userRepository;
             _tokenHelper = tokenHelper;
         }
-        public Task<string> Handle(LogInUserQuery request, CancellationToken cancellationToken)
+        public async Task<string> Handle(LogInUserQuery request, CancellationToken cancellationToken)
         {
-            var user = _fakeDatabase.Users.FirstOrDefault(user => user.UserName == request.LogInUser.UserName && user.Password == request.LogInUser.Password);
-            if (user == null)
+            if (string.IsNullOrWhiteSpace(request.LogInUser.UserName) || string.IsNullOrWhiteSpace(request.LogInUser.Password))
+            {
+                throw new ArgumentException("Username and password cannot be empty");
+            }
 
+            var user = await _userRepository.LogInUser(request.LogInUser.UserName, request.LogInUser.Password);
+
+            if (user == null)
             {
                 throw new UnauthorizedAccessException("Invalid username or password");
             }
 
             string token = _tokenHelper.GenerateJwtToken(user);
-            return Task.FromResult(token);
+
+            return token;
         }
     }
 }
