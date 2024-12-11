@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Commands.Books.UpdateBook
 {
-    public class UpdateBookByIdCommandHandler : IRequestHandler<UpdateBookByIdCommand, Book>
+    public class UpdateBookByIdCommandHandler : IRequestHandler<UpdateBookByIdCommand, OperationResult<Book>>
     {
         private readonly IBookRepository _bookRepository;
 
@@ -12,31 +12,33 @@ namespace Application.Commands.Books.UpdateBook
         {
             _bookRepository = bookRepository;
         }
-        public async Task<Book> Handle(UpdateBookByIdCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<Book>> Handle(UpdateBookByIdCommand request, CancellationToken cancellationToken)
         {
             if (request == null || request.Id == Guid.Empty ||
-                string.IsNullOrWhiteSpace(request.UpdatedBook.Title) ||
-                string.IsNullOrWhiteSpace(request.UpdatedBook.Description))
+               string.IsNullOrWhiteSpace(request.UpdatedBook.Title) ||
+               string.IsNullOrWhiteSpace(request.UpdatedBook.Description))
             {
-                throw new ArgumentException("Invalid ID or missing required fields");
+                return OperationResult<Book>.Failure("Invalid ID or missing required fields.", "Validation error");
             }
 
-
-            Book bookToUpdate = await _bookRepository.GetBookById(request.Id);
-
+            var bookToUpdate = await _bookRepository.GetBookById(request.Id);
             if (bookToUpdate == null)
             {
-                throw new KeyNotFoundException($"Author with ID {request.Id} was not found.");
+                return OperationResult<Book>.Failure($"Book with ID {request.Id} was not found.", "Not Found");
             }
 
             bookToUpdate.Title = request.UpdatedBook.Title;
             bookToUpdate.Description = request.UpdatedBook.Description;
 
-            Book updatedBook = await _bookRepository.UpdateBookById(request.Id, bookToUpdate);
-
-            return updatedBook;
-
+            try
+            {
+                var updatedBook = await _bookRepository.UpdateBookById(request.Id, bookToUpdate);
+                return OperationResult<Book>.Success(updatedBook, "Book updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult<Book>.Failure($"An error occurred while updating the book: {ex.Message}");
+            }
         }
-
     }
 }

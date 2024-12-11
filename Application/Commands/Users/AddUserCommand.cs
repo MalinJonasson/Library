@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Commands.Users
 {
-    public class AddUserCommand : IRequest<User>
+    public class AddUserCommand : IRequest<OperationResult<User>>
     {
 
         public AddUserCommand(User newUser)

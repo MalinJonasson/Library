@@ -12,12 +12,15 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AuthorController : Controller
+    public class AuthorController : ControllerBase
     {
-        internal readonly IMediator _mediator;
-        public AuthorController(IMediator mediator)
+        private readonly IMediator _mediator;
+        private readonly ILogger<AuthorController> _logger;
+
+        public AuthorController(IMediator mediator, ILogger<AuthorController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         [Authorize]
@@ -25,16 +28,34 @@ namespace API.Controllers
         [Route("addNewAuthor")]
         public async Task<IActionResult> AddNewAuthor([FromBody] Author authorToAdd)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var authorToBeAdded = await _mediator.Send(new AddAuthorCommand(authorToAdd));
-                return Ok(authorToBeAdded);
-            }
-            catch (Exception ex) 
-            {
-                return BadRequest(ex.Message);
+                _logger.LogWarning("Invalid model state for AddNewAuthor.");
+                return BadRequest(ModelState);
             }
 
+            try
+            {
+                var addNewAuthorOperationResult = await _mediator.Send(new AddAuthorCommand(authorToAdd));
+
+                if (addNewAuthorOperationResult.IsSuccess)
+                {
+                    _logger.LogInformation("Successfully added a new author with ID: {AuthorId}", addNewAuthorOperationResult.Data.Id);
+                    return Ok(new
+                    {
+                        message = addNewAuthorOperationResult.Message,
+                        author = addNewAuthorOperationResult.Data
+                    });
+                }
+
+                _logger.LogWarning("Failed to add author: {Error}", addNewAuthorOperationResult.Message);
+                return BadRequest(new { message = addNewAuthorOperationResult.Message, errors = addNewAuthorOperationResult.ErrorMessage });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred in AddNewAuthor.");
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
         [HttpGet]
@@ -43,68 +64,99 @@ namespace API.Controllers
         {
             try
             {
-                var allAuthors = await _mediator.Send(new GetAllAuthorsQuery());
-                return Ok(allAuthors);
+                var getAllAuthorsOperationResult = await _mediator.Send(new GetAllAuthorsQuery());
+
+                if (getAllAuthorsOperationResult.IsSuccess)
+                {
+                    return Ok(getAllAuthorsOperationResult.Data);
+                }
+
+                _logger.LogWarning("Failed to retrieve authors: {Error}", getAllAuthorsOperationResult.Message);
+                return BadRequest(new { message = getAllAuthorsOperationResult.Message, errors = getAllAuthorsOperationResult.ErrorMessage });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "An unexpected error occurred in GetAllAuthors.");
+                return StatusCode(500, "An unexpected error occurred.");
             }
         }
 
         [HttpGet]
-        [Route("{authorId}")]
-        public async Task<IActionResult> GetAuthorsById(Guid authorId)
+        [Route("{authorId:guid}")]
+        public async Task<IActionResult> GetAuthorById(Guid authorId)
         {
             try
             {
-               var getAuthorById = await _mediator.Send(new GetAuthorsByIdQuery(authorId));
-                return Ok(getAuthorById);
+                var getAuthorByIdOperationResult = await _mediator.Send(new GetAuthorsByIdQuery(authorId));
+
+                if (getAuthorByIdOperationResult.IsSuccess)
+                {
+                    return Ok(getAuthorByIdOperationResult.Data);
+                }
+
+                _logger.LogWarning("Author with ID: {AuthorId} not found.", authorId);
+                return NotFound(new { message = getAuthorByIdOperationResult.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "An unexpected error occurred in GetAuthorById.");
+                return StatusCode(500, "An unexpected error occurred.");
             }
         }
 
         [Authorize]
         [HttpPut]
-        [Route("updateAuthor/{updatedAuthorId}")]
+        [Route("updateAuthor/{updatedAuthorId:guid}")]
         public async Task<IActionResult> UpdateAuthor([FromBody] Author updatedAuthor, Guid updatedAuthorId)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for UpdateAuthor.");
+                return BadRequest(ModelState);
+            }
+
             try
             {
-                var authorToUpdate = await _mediator.Send(new UpdateAuthorByIdCommand(updatedAuthor, updatedAuthorId));
-                return Ok(authorToUpdate);
+                var updateAuthorByIdOperationResult = await _mediator.Send(new UpdateAuthorByIdCommand(updatedAuthor, updatedAuthorId));
+
+                if (updateAuthorByIdOperationResult.IsSuccess)
+                {
+                    return Ok(new { message = updateAuthorByIdOperationResult.Message });
+                }
+
+                _logger.LogWarning("Failed to update author: {Error}", updateAuthorByIdOperationResult.Message);
+                return BadRequest(new { message = updateAuthorByIdOperationResult.Message, errors = updateAuthorByIdOperationResult.ErrorMessage });
             }
-            catch (ArgumentNullException ex)
+            catch (Exception ex)
             {
-               return BadRequest(ex.Message);
+                _logger.LogError(ex, "An unexpected error occurred in UpdateAuthor.");
+                return StatusCode(500, "An unexpected error occurred.");
             }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-                      
-            
         }
 
         [Authorize]
         [HttpDelete]
-        [Route("deleteAuthor/{authorToDeleteId}")]
-        public async Task<IActionResult> DeleteAuthor([FromBody] Guid authorToDeleteId)
+        [Route("deleteAuthor/{authorToDeleteId:guid}")]
+        public async Task<IActionResult> DeleteAuthor(Guid authorToDeleteId)
         {
             try
             {
-                var authorToDelete = await _mediator.Send(new DeleteAuthorByIdCommand(authorToDeleteId));
-                return Ok(authorToDelete);
+                var deleteAuthorByIdOperationResult = await _mediator.Send(new DeleteAuthorByIdCommand(authorToDeleteId));
+
+                if (deleteAuthorByIdOperationResult.IsSuccess)
+                {
+                    return Ok(new { message = deleteAuthorByIdOperationResult.Message });
+                }
+
+                _logger.LogWarning("Failed to delete author: {Error}", deleteAuthorByIdOperationResult.Message);
+                return BadRequest(new { message = deleteAuthorByIdOperationResult.Message, errors = deleteAuthorByIdOperationResult.ErrorMessage });
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-
+                _logger.LogError(ex, "An unexpected error occurred in DeleteAuthor.");
+                return StatusCode(500, "An unexpected error occurred.");
             }
-
         }
     }
+
 }

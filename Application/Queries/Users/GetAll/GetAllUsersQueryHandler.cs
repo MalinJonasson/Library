@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Queries.Users.GetAll
 {
-    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<User>>
+    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, OperationResult<List<User>>>
     {
         private readonly IUserRepository _userRepository;
 
@@ -12,16 +12,25 @@ namespace Application.Queries.Users.GetAll
         {
             _userRepository = userRepository;
         }
-        public async Task<List<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+
+        public async Task<OperationResult<List<User>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            List<User> allUsers = await _userRepository.GetAllUsers();
-
-            if (allUsers == null || !allUsers.Any())
+            try
             {
-                throw new ArgumentException("Userlist is empty or null");
-            }
+                List<User> allUsers = await _userRepository.GetAllUsers();
 
-            return allUsers;
+                if (allUsers == null || !allUsers.Any())
+                {
+                    return OperationResult<List<User>>.Failure("User list is empty or null", "No users found");
+                }
+
+                return OperationResult<List<User>>.Success(allUsers, "Users fetched successfully");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult<List<User>>.Failure($"An error occurred while fetching users: {ex.Message}");
+            }
         }
+
     }
 }

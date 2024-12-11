@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Queries.Authors.GetById
 {
-    public class GetAuthorsByIdQuery : IRequest<Author>
+    public class GetAuthorsByIdQuery : IRequest<OperationResult<Author>>
     {
         public GetAuthorsByIdQuery(Guid authorId)
         {

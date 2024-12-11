@@ -12,29 +12,49 @@ namespace Infrastructure.Repositories
         {
             _realDatabase = realDatabase;
         }
-        public Task<Book> AddBook(Book book)
+        public async Task<Book> AddBook(Book book)
         {
-            throw new NotImplementedException();
+            _realDatabase.Books.Add(book);
+            _realDatabase.SaveChanges();
+            return book;
         }
 
-        public Task<Book> DeleteBookById(Guid id)
+        public async Task<Book> DeleteBookById(Guid id)
         {
-            throw new NotImplementedException();
+            Book bookToDelete = _realDatabase.Books.FirstOrDefault(a => a.Id == id);
+
+            _realDatabase.Books.Remove(bookToDelete);
+            await _realDatabase.SaveChangesAsync();
+
+            return bookToDelete;
         }
 
-        public Task<List<Book>> GetAllBooks()
+        public async Task<List<Book>> GetAllBooks()
         {
-            throw new NotImplementedException();
+            return await Task.FromResult(_realDatabase.Books.ToList());
         }
 
-        public Task<Book> GetBookById(Guid id)
+        public async Task<Book> GetBookById(Guid id)
         {
-            throw new NotImplementedException();
+            Book book = _realDatabase.Books.FirstOrDefault(a => a.Id == id);
+
+            return await Task.FromResult(book);
         }
 
-        public Task<Book> UpdateBookById(Guid id, Book book)
+        public async Task<Book> UpdateBookById(Guid id, Book book)
         {
-            throw new NotImplementedException();
+            Book bookToUpdate = _realDatabase.Books.FirstOrDefault(a => a.Id == id);
+
+            if (bookToUpdate == null)
+            {
+                throw new KeyNotFoundException($"Author with ID {id} was not found.");
+            }
+
+            bookToUpdate.Title = book.Title;
+
+            await _realDatabase.SaveChangesAsync();
+
+            return bookToUpdate;
         }
     }
 }

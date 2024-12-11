@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Queries.Users.LogIn
 {
-    public class LogInUserQuery : IRequest<String>
+    public class LogInUserQuery : IRequest<OperationResult<string>>
     {
 
         public LogInUserQuery(User logInUser)

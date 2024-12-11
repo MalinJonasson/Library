@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces.RepositoryInterfaces;
 using Domain.Models;
 using Infrastructure.Database;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Repositories
 {
@@ -13,14 +12,16 @@ namespace Infrastructure.Repositories
         {
             _realDatabase = realDatabase;
         }
-        public Task<User> AddUser(User user)
+        public async Task<User> AddUser(User user)
         {
-            throw new NotImplementedException();
+            _realDatabase.Users.Add(user);
+            _realDatabase.SaveChanges();
+            return user;
         }
 
-        public Task<List<User>> GetAllUsers()
+        public async Task<List<User>> GetAllUsers()
         {
-            throw new NotImplementedException();
+            return await Task.FromResult(_realDatabase.Users.ToList());
         }
 
         public Task<User> LogInUser(string username, string password)

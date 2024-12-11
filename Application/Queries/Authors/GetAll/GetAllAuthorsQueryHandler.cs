@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Queries.Authors.GetAll
 {
-    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
+    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, OperationResult<List<Author>>>
     {
         private readonly IAuthorRepository _authorRepository;
 
@@ -12,17 +12,22 @@ namespace Application.Queries.Authors.GetAll
         {
             _authorRepository = authorRepository;
         }
-        public async Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<List<Author>>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
         {
-            List<Author> allAuthors = await _authorRepository.GetAllAuthors();
-
-            if (allAuthors == null || !allAuthors.Any())
+            try
             {
-                throw new ArgumentException("Authorlist is empty or null");
+                var allAuthors = await _authorRepository.GetAllAuthors();
+                if (allAuthors == null || !allAuthors.Any())
+                {
+                    return OperationResult<List<Author>>.Failure("Author list is empty or null.", "No authors found.");
+                }
+
+                return OperationResult<List<Author>>.Success(allAuthors, "Authors retrieved successfully.");
             }
-
-            return allAuthors;
+            catch (Exception ex)
+            {
+                return OperationResult<List<Author>>.Failure($"An error occurred while retrieving authors: {ex.Message}");
+            }
         }
-
     }
 }

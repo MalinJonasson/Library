@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Commands.Books.DeleteBook
 {
-    public class DeleteBookByIdCommandHandler : IRequestHandler<DeleteBookByIdCommand, Book>
+    public class DeleteBookByIdCommandHandler : IRequestHandler<DeleteBookByIdCommand, OperationResult<bool>>
     {
         private readonly IBookRepository _bookRepository;
 
@@ -12,23 +12,30 @@ namespace Application.Commands.Books.DeleteBook
         {
             _bookRepository = bookRepository;
         }
-        public async Task<Book> Handle(DeleteBookByIdCommand request, CancellationToken cancellationToken)
+
+
+        public async Task<OperationResult<bool>> Handle(DeleteBookByIdCommand request, CancellationToken cancellationToken)
         {
             if (request == null || request.Id == Guid.Empty)
             {
-                throw new ArgumentException("Invalid ID or missing required fields");
+                return OperationResult<bool>.Failure("Invalid ID or missing required fields.", "Validation error");
             }
 
-            Book bookToDelete = await _bookRepository.GetBookById(request.Id);
-
+            var bookToDelete = await _bookRepository.GetBookById(request.Id);
             if (bookToDelete == null)
             {
-                throw new KeyNotFoundException($"Book with ID {request.Id} was not found.");
+                return OperationResult<bool>.Failure($"Book with ID {request.Id} was not found.", "Not Found");
             }
 
-            await _bookRepository.DeleteBookById(request.Id);
-
-            return bookToDelete;
+            try
+            {
+                await _bookRepository.DeleteBookById(request.Id);
+                return OperationResult<bool>.Success(true, "Book deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult<bool>.Failure($"An error occurred while deleting the book: {ex.Message}");
+            }
         }
     }
 }

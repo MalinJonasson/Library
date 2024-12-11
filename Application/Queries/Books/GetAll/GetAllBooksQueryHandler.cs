@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Queries.Books.GetAll
 {
-    public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, List<Book>>
+    public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, OperationResult<List<Book>>>
     {
         private readonly IBookRepository _bookRepository;
 
@@ -13,16 +13,24 @@ namespace Application.Queries.Books.GetAll
             _bookRepository = bookRepository;
         }
 
-        public async Task<List<Book>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
-        {
-            List<Book> allBooks = await _bookRepository.GetAllBooks();
-
-            if (allBooks == null || !allBooks.Any())
+       public async Task<OperationResult<List<Book>>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
+       {
+            try
             {
-                throw new ArgumentException("Booklist is empty or null");
-            }
+                var allBooks = await _bookRepository.GetAllBooks();
 
-            return allBooks;
+                if (allBooks == null || !allBooks.Any())
+                {
+                    return OperationResult<List<Book>>.Failure("No books found in the database.", "Not Found");
+                }
+
+                return OperationResult<List<Book>>.Success(allBooks, "Books retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Hanterar oväntade fel och returnerar ett felresultat
+                return OperationResult<List<Book>>.Failure($"An error occurred while retrieving books: {ex.Message}");
+            }
         }
     }
 }
