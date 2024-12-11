@@ -1,29 +1,41 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Books.DeleteBook
 {
-    public class DeleteBookByIdCommandHandler : IRequestHandler<DeleteBookByIdCommand, Book>
+    public class DeleteBookByIdCommandHandler : IRequestHandler<DeleteBookByIdCommand, OperationResult<bool>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IBookRepository _bookRepository;
 
-        public DeleteBookByIdCommandHandler(FakeDatabase fakeDatabase)
+        public DeleteBookByIdCommandHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
-        public Task<Book> Handle(DeleteBookByIdCommand request, CancellationToken cancellationToken)
+
+
+        public async Task<OperationResult<bool>> Handle(DeleteBookByIdCommand request, CancellationToken cancellationToken)
         {
             if (request == null || request.Id == Guid.Empty)
             {
-                throw new ArgumentException("Invalid ID or missing required fields");
+                return OperationResult<bool>.Failure("Invalid ID or missing required fields.", "Validation error");
             }
 
-            Book? bookToDelete = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id);
+            var bookToDelete = await _bookRepository.GetBookById(request.Id);
+            if (bookToDelete == null)
+            {
+                return OperationResult<bool>.Failure($"Book with ID {request.Id} was not found.", "Not Found");
+            }
 
-            _fakeDatabase.Books.Remove(bookToDelete);
-
-            return Task.FromResult(bookToDelete);
+            try
+            {
+                await _bookRepository.DeleteBookById(request.Id);
+                return OperationResult<bool>.Success(true, "Book deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult<bool>.Failure($"An error occurred while deleting the book: {ex.Message}");
+            }
         }
     }
 }

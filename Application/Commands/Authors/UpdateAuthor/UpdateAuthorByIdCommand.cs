@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Commands.Authors.UpdateAuthor
 {
-    public class UpdateAuthorByIdCommand : IRequest<Author>
+    public class UpdateAuthorByIdCommand : IRequest<OperationResult<Author>>
     {
         public UpdateAuthorByIdCommand(Author updatedAuthor, Guid id)
         {

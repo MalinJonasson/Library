@@ -1,36 +1,36 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Queries.Books.GetAll
 {
-    public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, List<Book>>
+    public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, OperationResult<List<Book>>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IBookRepository _bookRepository;
 
-        public GetAllBooksQueryHandler(FakeDatabase fakeDatabase)
+        public GetAllBooksQueryHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
 
-        public Task<List<Book>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
-        {
-            List<Book> allBooksFromFakeDatabase = _fakeDatabase.Books;
-
-            if(allBooksFromFakeDatabase == null || !allBooksFromFakeDatabase.Any())
+       public async Task<OperationResult<List<Book>>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
+       {
+            try
             {
-                throw new ArgumentException("Booklist is empty or null");
-            }
+                var allBooks = await _bookRepository.GetAllBooks();
 
-            foreach (var book in allBooksFromFakeDatabase)
-            {
-                var authorToGet = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == book.AuthorId);
-                if (authorToGet != null)
-                { 
-                    book.Author = authorToGet;
+                if (allBooks == null || !allBooks.Any())
+                {
+                    return OperationResult<List<Book>>.Failure("No books found in the database.", "Not Found");
                 }
+
+                return OperationResult<List<Book>>.Success(allBooks, "Books retrieved successfully.");
             }
-            return Task.FromResult(allBooksFromFakeDatabase);
+            catch (Exception ex)
+            {
+                // Hanterar oväntade fel och returnerar ett felresultat
+                return OperationResult<List<Book>>.Failure($"An error occurred while retrieving books: {ex.Message}");
+            }
         }
     }
 }

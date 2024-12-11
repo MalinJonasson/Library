@@ -1,35 +1,40 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Authors.AddAuthor
 {
-    public class AddAuthorCommandHandler : IRequestHandler<AddAuthorCommand, Author>
+    public class AddAuthorCommandHandler : IRequestHandler<AddAuthorCommand, OperationResult<Author>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IAuthorRepository _authorRepository;
 
-        public AddAuthorCommandHandler(FakeDatabase fakeDatabase)
+        public AddAuthorCommandHandler(IAuthorRepository authorRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _authorRepository = authorRepository;
         }
 
-        public Task<Author> Handle(AddAuthorCommand request, CancellationToken cancellationToken)
+       public async Task<OperationResult<Author>> Handle(AddAuthorCommand request, CancellationToken cancellationToken)
         {
             if (request == null || request.NewAuthor == null || string.IsNullOrWhiteSpace(request.NewAuthor.Name))
             {
-                throw new ArgumentException("Author name cannot be empty or null");
+                return OperationResult<Author>.Failure("Author name cannot be empty or null.", "Validation error");
             }
 
-            Author authorToCreate = new()
+            try
             {
-                Id = Guid.NewGuid(),
-                Name = request.NewAuthor.Name
-            };
+                var authorToCreate = new Author
+                {
+                    Id = Guid.NewGuid(),
+                    Name = request.NewAuthor.Name
+                };
 
-            _fakeDatabase.Authors.Add(authorToCreate);
-
-            return Task.FromResult(authorToCreate);
+                await _authorRepository.AddAuthor(authorToCreate);
+                return OperationResult<Author>.Success(authorToCreate, "Author added successfully.");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult<Author>.Failure($"An error occurred while adding the author: {ex.Message}");
+            }
         }
-
     }
 }

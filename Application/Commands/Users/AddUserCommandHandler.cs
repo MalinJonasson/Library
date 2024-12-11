@@ -1,36 +1,44 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Users
 {
-    public class AddUserCommandHandler : IRequestHandler<AddUserCommand, User>
+    public class AddUserCommandHandler : IRequestHandler<AddUserCommand, OperationResult<User>>
     {
-        private readonly FakeDatabase _fakeDatabase;
 
-        public AddUserCommandHandler(FakeDatabase fakeDatabase)
+        private readonly IUserRepository _userRepository;
+
+        public AddUserCommandHandler(IUserRepository userRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _userRepository = userRepository;
         }
-        public Task<User> Handle(AddUserCommand request, CancellationToken cancellationToken)
+
+        public async Task<OperationResult<User>> Handle(AddUserCommand request, CancellationToken cancellationToken)
         {
             if (request == null || request.NewUser == null ||
-              string.IsNullOrWhiteSpace(request.NewUser.UserName) ||
-              string.IsNullOrWhiteSpace(request.NewUser.Password))
+                string.IsNullOrWhiteSpace(request.NewUser.UserName) ||
+                string.IsNullOrWhiteSpace(request.NewUser.Password))
             {
-                throw new ArgumentException("Author name and description cannot be empty or null");
+                return OperationResult<User>.Failure("User name and password cannot be empty or null.", "Validation error");
             }
 
-            User userToCreate = new()
+            try
             {
-                Id = Guid.NewGuid(),
-                UserName = request.NewUser.UserName,
-                Password = request.NewUser.Password,
-            };
+                User userToCreate = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = request.NewUser.UserName,
+                    Password = request.NewUser.Password,
+                };
 
-            _fakeDatabase.Users.Add(userToCreate);
-
-            return Task.FromResult(userToCreate);
+                await _userRepository.AddUser(userToCreate);
+                return OperationResult<User>.Success(userToCreate, "User created successfully.");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult<User>.Failure($"An error occurred while creating the user: {ex.Message}");
+            }
         }
     }
 }

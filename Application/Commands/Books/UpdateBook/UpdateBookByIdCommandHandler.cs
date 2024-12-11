@@ -1,45 +1,44 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Books.UpdateBook
 {
-    public class UpdateBookByIdCommandHandler : IRequestHandler<UpdateBookByIdCommand, Book>
+    public class UpdateBookByIdCommandHandler : IRequestHandler<UpdateBookByIdCommand, OperationResult<Book>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IBookRepository _bookRepository;
 
-        public UpdateBookByIdCommandHandler(FakeDatabase fakeDatabase)
+        public UpdateBookByIdCommandHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
-        public Task<Book> Handle(UpdateBookByIdCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<Book>> Handle(UpdateBookByIdCommand request, CancellationToken cancellationToken)
         {
             if (request == null || request.Id == Guid.Empty ||
-                string.IsNullOrWhiteSpace(request.UpdatedBook.Title) ||
-                string.IsNullOrWhiteSpace(request.UpdatedBook.Description))
+               string.IsNullOrWhiteSpace(request.UpdatedBook.Title) ||
+               string.IsNullOrWhiteSpace(request.UpdatedBook.Description))
             {
-                throw new ArgumentException("Invalid ID or missing required fields");
+                return OperationResult<Book>.Failure("Invalid ID or missing required fields.", "Validation error");
             }
-            Book bookToUpdate = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id);
+
+            var bookToUpdate = await _bookRepository.GetBookById(request.Id);
+            if (bookToUpdate == null)
+            {
+                return OperationResult<Book>.Failure($"Book with ID {request.Id} was not found.", "Not Found");
+            }
 
             bookToUpdate.Title = request.UpdatedBook.Title;
             bookToUpdate.Description = request.UpdatedBook.Description;
 
-            if (request.UpdatedBook.AuthorId != Guid.Empty)
+            try
             {
-                var authorToAddToBook = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == request.UpdatedBook.AuthorId);
-
-                if (authorToAddToBook == null)
-                {
-                    throw new ArgumentException("Invalid AuthorId, no author found with the provided ID");
-                }
-
-                bookToUpdate.AuthorId = authorToAddToBook.Id;
-                bookToUpdate.Author = authorToAddToBook;
+                var updatedBook = await _bookRepository.UpdateBookById(request.Id, bookToUpdate);
+                return OperationResult<Book>.Success(updatedBook, "Book updated successfully.");
             }
-
-            return Task.FromResult(bookToUpdate);
+            catch (Exception ex)
+            {
+                return OperationResult<Book>.Failure($"An error occurred while updating the book: {ex.Message}");
+            }
         }
-
     }
 }

@@ -1,9 +1,10 @@
-﻿using Domain.Models;
+﻿using Application.Dtos;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Books.AddBook
 {
-    public class AddBookCommand : IRequest<Book>
+    public class AddBookCommand : IRequest<OperationResult<Book>>
     {
         public AddBookCommand(Book newBook)
         {

@@ -1,38 +1,65 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Commands.Authors.UpdateAuthor
 {
-    public class UpdateAuthorByIdCommandHandler : IRequestHandler<UpdateAuthorByIdCommand, Author>
+    public class UpdateAuthorByIdCommandHandler : IRequestHandler<UpdateAuthorByIdCommand, OperationResult<Author>>
     {
 
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IAuthorRepository _authorRepository;
 
-
-        public UpdateAuthorByIdCommandHandler(FakeDatabase fakeDatabase)
+        public UpdateAuthorByIdCommandHandler(IAuthorRepository authorRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _authorRepository = authorRepository;
         }
 
-        public Task<Author> Handle(UpdateAuthorByIdCommand request, CancellationToken cancellationToken)
-        {
-            if (request == null || request.Id == Guid.Empty ||
-                string.IsNullOrWhiteSpace(request.UpdatedAuthor.Name))
+     // public async Task<Author> Handle(UpdateAuthorByIdCommand request, CancellationToken cancellationToken)
+     // {
+     //     if (request == null || request.Id == Guid.Empty || string.IsNullOrWhiteSpace(request.UpdatedAuthor.Name))
+     //     {
+     //         throw new ArgumentException("Invalid ID or missing required fields");
+     //     }
+     //
+     //     Author existingAuthor = await _authorRepository.GetAuthorById(request.Id);
+     //
+     //     if (existingAuthor == null)
+     //     {
+     //         throw new KeyNotFoundException($"Author with ID {request.Id} was not found.");
+     //     }
+     //
+     //     existingAuthor.Name = request.UpdatedAuthor.Name;
+     //
+     //     Author updatedAuthor = await _authorRepository.UpdateAuthorById(request.Id, existingAuthor);
+     //
+     //     return updatedAuthor;
+     //
+     // }
+
+       public async Task<OperationResult<Author>> Handle(UpdateAuthorByIdCommand request, CancellationToken cancellationToken)
+        { 
+            if (request == null || request.Id == Guid.Empty || string.IsNullOrWhiteSpace(request.UpdatedAuthor.Name))
             {
-                throw new ArgumentException("Invalid ID or missing required fields");
+                return OperationResult<Author>.Failure("Invalid ID or missing required fields.", "Validation error");
             }
 
-            Author authorToUpdate = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == request.Id)!;
-
-            if (authorToUpdate != null && !string.IsNullOrWhiteSpace(request.UpdatedAuthor.Name))
+            try
             {
-                authorToUpdate.Name = request.UpdatedAuthor.Name;
-                return Task.FromResult(authorToUpdate);
+                var existingAuthor = await _authorRepository.GetAuthorById(request.Id);
+
+                if (existingAuthor == null)
+                {
+                    return OperationResult<Author>.Failure($"Author with ID {request.Id} was not found.");
+                }
+
+                existingAuthor.Name = request.UpdatedAuthor.Name;
+                var updatedAuthor = await _authorRepository.UpdateAuthorById(request.Id, existingAuthor);
+                return OperationResult<Author>.Success(updatedAuthor, "Author updated successfully.");
             }
-
-            throw new ArgumentNullException("Author not found or name cannot be empty");
-
+            catch (Exception ex)
+            {
+                return OperationResult<Author>.Failure($"An error occurred while updating the author: {ex.Message}");
+            }
         }
     }
 }

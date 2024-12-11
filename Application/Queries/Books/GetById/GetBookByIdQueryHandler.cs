@@ -1,33 +1,41 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain.Models;
 using MediatR;
 
 namespace Application.Queries.Books.GetById
 {
-    public class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, Book>
+    public class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, OperationResult<Book>>
     {
-        private readonly FakeDatabase _fakeDatabase;
 
-        public GetBookByIdQueryHandler(FakeDatabase fakeDatabase)
+        private readonly IBookRepository _bookRepository;
+
+        public GetBookByIdQueryHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
-        public Task<Book> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
+
+        public async Task<OperationResult<Book>> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
         {
             if (request == null || request.Id == Guid.Empty)
             {
-                throw new ArgumentException("Invalid ID or missing required fields");
+                return OperationResult<Book>.Failure("Invalid ID or missing required fields.", "Validation error");
             }
 
-            Book wantedBook = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.Id)!;
-
-            var author = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == wantedBook.AuthorId);
-            if (author != null)
+            try
             {
-                wantedBook.Author = author;
-            }
+                var wantedBook = await _bookRepository.GetBookById(request.Id);
 
-            return Task.FromResult(wantedBook);
+                if (wantedBook == null)
+                {
+                    return OperationResult<Book>.Failure($"Book with ID {request.Id} was not found.");
+                }
+
+                return OperationResult<Book>.Success(wantedBook, "Book retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult<Book>.Failure($"An error occurred while retrieving the book: {ex.Message}");
+            }
         }
     }
 }
