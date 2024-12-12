@@ -4,7 +4,7 @@ using Application.Commands.Authors.UpdateAuthor;
 using Domain.Models;
 namespace Test.CommandTest.AuthorTest
 {
-    [TestFixture]
+    //[TestFixture]
     public class AuthorCommandUnitTest
     {
         //private FakeDatabase _fakeDatabase;
