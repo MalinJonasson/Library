@@ -24,22 +24,16 @@ namespace Test.IntergrationsTest.AuthorIntergrationsTest
 
         public AuthorIntegrationsTest()
         {
-            // Mocka BookRepository med FakeItEasy
             _authorRepositoryMock = A.Fake<IAuthorRepository>();
 
-            // Setup Dependency Injection och MediatR
             var services = new ServiceCollection();
 
-            // Registrera IBookRepository som mock-implementation
             services.AddSingleton(_authorRepositoryMock);
 
-            // Registrera MediatR och dess handlers
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetAllAuthorsQueryHandler>());
 
-            // Bygg DI-container
             var serviceProvider = services.BuildServiceProvider();
 
-            // Hämta MediatR via service provider
             _mediator = serviceProvider.GetRequiredService<IMediator>();
         }
 
@@ -59,7 +53,6 @@ namespace Test.IntergrationsTest.AuthorIntergrationsTest
             Assert.NotNull(result.Data);
             Assert.Equal(newAuthor.Name, result.Data.Name);
 
-            // Kontrollera att AddBook anropades exakt en gång
             A.CallTo(() => _authorRepositoryMock.AddAuthor(A<Author>.That.Matches(author => author.Name == newAuthor.Name)))
                 .MustHaveHappenedOnceExactly();
         }
